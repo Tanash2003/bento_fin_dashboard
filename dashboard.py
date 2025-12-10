@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 
 
 # ---------- Helpers to clean your specific Excel structure ----------
@@ -468,13 +469,42 @@ with tabs[3]:
     st.subheader("Break-even Analysis (Net Cash Over Time)")
 
     if be_df is not None and not be_df.empty:
-        fig_cash = px.line(
-            be_df,
-            x="Month",
-            y="Net cash",
-            markers=True,
-            title="Net Cash vs Month",
+        # Prepare separate positive and negative series for Net cash
+        be_plot = be_df.copy()
+        be_plot["Net_cash_pos"] = be_plot["Net cash"].where(be_plot["Net cash"] >= 0)
+        be_plot["Net_cash_neg"] = be_plot["Net cash"].where(be_plot["Net cash"] < 0)
+
+        # Build 2-colour line chart
+        fig_cash = go.Figure()
+
+        # Net cash >= 0  → e.g. green
+        fig_cash.add_trace(
+            go.Scatter(
+                x=be_plot["Month"],
+                y=be_plot["Net_cash_pos"],
+                mode="lines+markers",
+                name="Net cash ≥ 0",
+                line=dict(width=3, color="green"),
+            )
         )
+
+        # Net cash < 0 → e.g. red
+        fig_cash.add_trace(
+            go.Scatter(
+                x=be_plot["Month"],
+                y=be_plot["Net_cash_neg"],
+                mode="lines+markers",
+                name="Net cash < 0",
+                line=dict(width=3, color="red"),
+            )
+        )
+
+        fig_cash.update_layout(
+            title="Net Cash vs Month (Break-even)",
+            xaxis_title="Month",
+            yaxis_title="Net cash",
+        )
+
         st.plotly_chart(fig_cash, use_container_width=True)
 
         st.markdown("#### Inputs used in break-even sheet")
@@ -500,6 +530,7 @@ with tabs[3]:
         st.dataframe(be_df, use_container_width=True)
     else:
         st.warning("Could not parse the 'Break even analysis' sheet correctly.")
+
 
 
 # ---------- TAB 5: Unit Economics ----------
