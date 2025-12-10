@@ -562,8 +562,8 @@ else:
             else "N/A",
         )
 
-        st.markdown("#### Detailed break-even table")
-        st.dataframe(be_df, use_container_width=True)
+    st.markdown("#### Detailed break-even table")
+    st.dataframe(be_df, use_container_width=True)
     else:
         st.warning("Could not parse the 'Break even analysis' sheet correctly.")
 
