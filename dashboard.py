@@ -536,12 +536,12 @@ else:
 
 contrib = be_meta.get("contribution_per_customer")
 if contrib is not None:
-    c2.metric(
+c2.metric(
         "Contribution per customer (per month)",
         f"AED {contrib:,.2f}",
     )
 else:
-    c2.metric("Contribution per customer (per month)", "N/A")
+c2.metric("Contribution per customer (per month)", "N/A")
 
 fixed = be_meta.get("fixed_cost_monthly")
 if fixed is not None:
