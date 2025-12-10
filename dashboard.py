@@ -331,9 +331,10 @@ rev_monthly = parse_revenue_monthly(sheets.get("Revenue"))
 be_df, be_meta = parse_break_even(sheets.get("Break even analysis"))
 pnl_wide, pnl_long, pnl_meta = parse_pnl(sheets.get("Projected P&L"))
 
- = st.tabs(
+tabs = st.tabs(
     ["Summary", "Revenue (Monthly)", "P&L (Yearly)", "Break-even", "Unit Economics", "Raw Data"]
 )
+
 
 # ---------- TAB 1: Summary ----------
 with tabs[0]:
