@@ -549,7 +549,7 @@ if fixed is not None:
 else:
     c3.metric("Fixed cost (per month)", "N/A")
 
-        c2.metric(
+    c2.metric(
             "Contribution per customer (per month)",
             f"AED {be_meta['contribution_per_customer']:,.2f}"
             if be_meta["contribution_per_customer"]
