@@ -555,7 +555,7 @@ else:
             if be_meta["contribution_per_customer"]
             else "N/A",
         )
-        c3.metric(
+    c3.metric(
             "Fixed cost (per month)",
             f"AED {be_meta['fixed_cost_monthly']:,.0f}"
             if be_meta["fixed_cost_monthly"]
