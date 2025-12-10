@@ -198,52 +198,67 @@ def parse_revenue_monthly(df):
 
 def parse_break_even(df):
     """
-    'Break even analysis' structure:
+    'Break even analysis' structure in your file:
 
-    Row 0–3: meta (upfront cost, contribution per customer, fixed cost)
-    Row 4: ["Month", "Net profit", "Net cash"]
-    Row 5+: data
+    Columns:
+      - col[0]: "Total upfront cost (month zero)"
+      - col[1]: -32500 (the actual upfront cost, as column header)
+      - col[2]: "Unnamed: 2"
+
+    Rows:
+      - row 0–3: meta (mostly NaN in row 0, then labels)
+      - row 4: ["Month", "Net profit", "Net cash"]
+      - row 5+: data
     """
-    # meta
+    if df is None or df.empty:
+        return pd.DataFrame(), {
+            "upfront_cost": None,
+            "contribution_per_customer": None,
+            "fixed_cost_monthly": None,
+            "break_even_month": None,
+        }
+
+    # --- META VALUES ---
     upfront_cost = None
     contribution_per_customer = None
     fixed_cost_monthly = None
 
-    # Upfront cost: row 0, col 1
+    # ✅ Upfront cost is stored in the SECOND column header (df.columns[1])
     try:
-        upfront_cost = float(df.iloc[0, 1])
+        upfront_cost = float(df.columns[1])
     except Exception:
-        pass
+        upfront_cost = None
 
-    # row 1: contribution per customer
+    # Contribution per customer: row 1, col 1
     try:
         contribution_per_customer = float(df.iloc[1, 1])
     except Exception:
-        pass
+        contribution_per_customer = None
 
-    # row 2: expected fixed cost
+    # Expected fixed cost: row 2, col 1
     try:
         fixed_cost_monthly = float(df.iloc[2, 1])
     except Exception:
-        pass
+        fixed_cost_monthly = None
 
-    # data
+    # --- DATA TABLE ---
     df2 = df.iloc[4:].copy()
     df2.columns = ["Month", "Net profit", "Net cash"]
     df2 = df2.dropna(subset=["Month"])
+
     df2["Month"] = pd.to_numeric(df2["Month"], errors="coerce")
     df2["Net profit"] = pd.to_numeric(df2["Net profit"], errors="coerce")
     df2["Net cash"] = pd.to_numeric(df2["Net cash"], errors="coerce")
     df2 = df2.dropna(subset=["Month"])
 
-    # break-even month where Net cash flips from negative to positive
+    # Break-even month (first month where Net cash >= 0)
     be_month = None
     try:
         positive = df2[df2["Net cash"] >= 0]
         if not positive.empty:
             be_month = int(positive["Month"].iloc[0])
     except Exception:
-        pass
+        be_month = None
 
     return df2, {
         "upfront_cost": upfront_cost,
@@ -251,6 +266,7 @@ def parse_break_even(df):
         "fixed_cost_monthly": fixed_cost_monthly,
         "break_even_month": be_month,
     }
+
 
 
 def parse_pnl(df):
@@ -315,7 +331,7 @@ rev_monthly = parse_revenue_monthly(sheets.get("Revenue"))
 be_df, be_meta = parse_break_even(sheets.get("Break even analysis"))
 pnl_wide, pnl_long, pnl_meta = parse_pnl(sheets.get("Projected P&L"))
 
-tabs = st.tabs(
+ = st.tabs(
     ["Summary", "Revenue (Monthly)", "P&L (Yearly)", "Break-even", "Unit Economics", "Raw Data"]
 )
 
@@ -509,10 +525,29 @@ with tabs[3]:
 
         st.markdown("#### Inputs used in break-even sheet")
         c1, c2, c3 = st.columns(3)
-        c1.metric(
-            "Upfront cost (Month 0)",
-            f"AED {be_meta['upfront_cost']:,.0f}" if be_meta["upfront_cost"] else "N/A",
-        )
+        c1, c2, c3 = st.columns(3)
+
+upfront = be_meta.get("upfront_cost")
+if upfront is not None:
+    c1.metric("Upfront cost (Month 0)", f"AED {upfront:,.0f}")
+else:
+    c1.metric("Upfront cost (Month 0)", "N/A")
+
+contrib = be_meta.get("contribution_per_customer")
+if contrib is not None:
+    c2.metric(
+        "Contribution per customer (per month)",
+        f"AED {contrib:,.2f}",
+    )
+else:
+    c2.metric("Contribution per customer (per month)", "N/A")
+
+fixed = be_meta.get("fixed_cost_monthly")
+if fixed is not None:
+    c3.metric("Fixed cost (per month)", f"AED {fixed:,.0f}")
+else:
+    c3.metric("Fixed cost (per month)", "N/A")
+
         c2.metric(
             "Contribution per customer (per month)",
             f"AED {be_meta['contribution_per_customer']:,.2f}"
