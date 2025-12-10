@@ -482,6 +482,7 @@ with tabs[2]:
 
 
 # ---------- TAB 4: Break-even ----------
+# ---------- TAB 4: Break-even ----------
 with tabs[3]:
     st.subheader("Break-even Analysis (Net Cash Over Time)")
 
@@ -494,7 +495,7 @@ with tabs[3]:
         # Build 2-colour line chart
         fig_cash = go.Figure()
 
-        # Net cash >= 0  → e.g. green
+        # Net cash >= 0
         fig_cash.add_trace(
             go.Scatter(
                 x=be_plot["Month"],
@@ -505,7 +506,7 @@ with tabs[3]:
             )
         )
 
-        # Net cash < 0 → e.g. red
+        # Net cash < 0
         fig_cash.add_trace(
             go.Scatter(
                 x=be_plot["Month"],
@@ -526,44 +527,31 @@ with tabs[3]:
 
         st.markdown("#### Inputs used in break-even sheet")
         c1, c2, c3 = st.columns(3)
-        c1, c2, c3 = st.columns(3)
 
-upfront = be_meta.get("upfront_cost")
-if upfront is not None:
-    c1.metric("Upfront cost (Month 0)", f"AED {upfront:,.0f}")
-else:
-    c1.metric("Upfront cost (Month 0)", "N/A")
+        upfront = be_meta.get("upfront_cost")
+        if upfront is not None:
+            c1.metric("Upfront cost (Month 0)", f"AED {upfront:,.0f}")
+        else:
+            c1.metric("Upfront cost (Month 0)", "N/A")
 
-contrib = be_meta.get("contribution_per_customer")
-if contrib is not None:
-    c2.metric(
-        "Contribution per customer (per month)",
-        f"AED {contrib:,.2f}",
-    )
-else:
-    c2.metric("Contribution per customer (per month)", "N/A")
+        contrib = be_meta.get("contribution_per_customer")
+        if contrib is not None:
+            c2.metric(
+                "Contribution per customer (per month)",
+                f"AED {contrib:,.2f}",
+            )
+        else:
+            c2.metric("Contribution per customer (per month)", "N/A")
 
-fixed = be_meta.get("fixed_cost_monthly")
-if fixed is not None:
-    c3.metric("Fixed cost (per month)", f"AED {fixed:,.0f}")
-else:
-    c3.metric("Fixed cost (per month)", "N/A")
+        fixed = be_meta.get("fixed_cost_monthly")
+        if fixed is not None:
+            c3.metric("Fixed cost (per month)", f"АED {fixed:,.0f}")
+        else:
+            c3.metric("Fixed cost (per month)", "N/A")
 
-    c2.metric(
-            "Contribution per customer (per month)",
-            f"AED {be_meta['contribution_per_customer']:,.2f}"
-            if be_meta["contribution_per_customer"]
-            else "N/A",
-        )
-    c3.metric(
-            "Fixed cost (per month)",
-            f"AED {be_meta['fixed_cost_monthly']:,.0f}"
-            if be_meta["fixed_cost_monthly"]
-            else "N/A",
-        )
+        st.markdown("#### Detailed break-even table")
+        st.dataframe(be_df, use_container_width=True)
 
-    st.markdown("#### Detailed break-even table")
-    st.dataframe(be_df, use_container_width=True)
     else:
         st.warning("Could not parse the 'Break even analysis' sheet correctly.")
 
